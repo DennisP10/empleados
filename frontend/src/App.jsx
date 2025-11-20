@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-// 👇 AQUÍ ESTÁ LA CORRECCIÓN: Agregué 'Users' y todos los demás iconos necesarios
-import { Users, Plus, Search, Calculator, Pencil, Trash2, X, Save, DollarSign, Sun, Moon, Eye } from 'lucide-react';
+import { Users, Plus, Search, Calculator, Pencil, Trash2, X, Save, Sun } from 'lucide-react';
 import useTheme from './hooks/useTheme';
 import './App.css';
 
 function App() {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-  
-  // Hook del tema
   const [theme, setTheme] = useTheme();
 
   const [empleados, setEmpleados] = useState([]);
@@ -29,9 +26,7 @@ function App() {
       const res = await fetch(url);
       const data = await res.json();
       setEmpleados(data);
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) { console.error(error); }
   };
 
   const fetchPromedio = async () => {
@@ -39,9 +34,7 @@ function App() {
       const res = await fetch(`${API_URL}/empleados/promedio-salario`);
       const data = await res.json();
       setPromedio(data.promedio);
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) { console.error(error); }
   };
 
   useEffect(() => { fetchEmpleados(); }, []);
@@ -64,11 +57,7 @@ function App() {
       });
       
       Swal.fire({
-        title: '¡Éxito!',
-        text: 'Operación realizada correctamente',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false
+        title: '¡Éxito!', text: 'Operación realizada correctamente', icon: 'success', timer: 1500, showConfirmButton: false
       });
 
       setFormData({ nombres: '', apellidos: '', cargo: '', salario: '', departamento: '' });
@@ -89,12 +78,7 @@ function App() {
 
   const handleEliminar = async (id) => {
     const result = await Swal.fire({
-      title: '¿Borrar?',
-      text: "No podrás revertir esto",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, borrar',
-      cancelButtonText: 'Cancelar'
+      title: '¿Borrar?', text: "No podrás revertir esto", icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, borrar', confirmButtonColor: '#ef4444'
     });
 
     if (result.isConfirmed) {
@@ -108,20 +92,15 @@ function App() {
     <div className="container">
       {/* HEADER */}
       <div className="header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="header-left">
           <div className="header-icon-box">
-            <Users size={24} />
+            <Users size={28} />
           </div>
           <h1>Gestión de Empleados</h1>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-           {/* SELECTOR DE TEMA */}
-           <select 
-              className="theme-select"
-              value={theme} 
-              onChange={(e) => setTheme(e.target.value)}
-           >
+        <div className="header-right">
+           <select className="theme-select" value={theme} onChange={(e) => setTheme(e.target.value)}>
               <option value="light">🌞 Claro</option>
               <option value="dark">🌙 Oscuro</option>
               <option value="high-contrast">👁️ Alto Contraste</option>
@@ -135,20 +114,20 @@ function App() {
               setFormData({ nombres: '', apellidos: '', cargo: '', salario: '', departamento: '' });
             }}
           >
-            {mostrarFormulario ? <X size={18} /> : <Plus size={18} />}
+            {mostrarFormulario ? <X size={20} /> : <Plus size={20} />}
             {mostrarFormulario ? 'Cerrar' : 'Nuevo'}
           </button>
         </div>
       </div>
 
-      {/* FORMULARIO */}
+      {/* FORMULARIO (Colapsable) */}
       {mostrarFormulario && (
-        <div className="card animate-fade-in">
-          <h3 style={{ marginTop: 0, marginBottom: '20px' }}>
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <h3 style={{ marginTop: 0, marginBottom: '20px', color: 'var(--accent-color)' }}>
             {editandoId ? 'Editar Empleado' : 'Nuevo Empleado'}
           </h3>
           <form onSubmit={handleSubmit}>
-            <div className="form-grid">
+            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
               <div className="input-group"><input name="nombres" placeholder="Nombres" value={formData.nombres} onChange={handleChange} required /></div>
               <div className="input-group"><input name="apellidos" placeholder="Apellidos" value={formData.apellidos} onChange={handleChange} required /></div>
               <div className="input-group"><input name="cargo" placeholder="Cargo" value={formData.cargo} onChange={handleChange} required /></div>
@@ -164,44 +143,64 @@ function App() {
         </div>
       )}
 
-      {/* TABLA */}
+      {/* TARJETA PRINCIPAL CON TABLA */}
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <div className="input-group">
-                <Search size={18} style={{ marginLeft: '10px' }} />
+        {/* BARRA DE HERRAMIENTAS */}
+        <div className="toolbar">
+            <div className="search-box">
+                <Search className="search-icon" size={18} />
                 <input 
-                  style={{ paddingLeft: '35px' }}
-                  placeholder="Buscar Depto..." 
+                  type="text"
+                  placeholder="Buscar por departamento..." 
                   value={filtroDepto}
                   onChange={(e) => setFiltroDepto(e.target.value)}
                 />
             </div>
             <button className="btn btn-secondary" onClick={fetchPromedio}>
-              <Calculator size={18} /> Promedio
-              {promedio && <span style={{ marginLeft: '5px' }}>(${parseFloat(promedio).toFixed(2)})</span>}
+              <Calculator size={18} /> Promedio Salarial
+              {promedio && <span style={{ marginLeft: '8px', fontWeight: 'bold', color: 'var(--accent-color)' }}>${parseFloat(promedio).toFixed(2)}</span>}
             </button>
         </div>
 
+        {/* TABLA */}
         <div className="table-container">
           <table>
             <thead>
               <tr>
-                <th>Empleado</th><th>Cargo</th><th>Depto</th><th>Salario</th><th>Acciones</th>
+                <th>Empleado</th>
+                <th>Cargo</th>
+                <th>Departamento</th>
+                <th>Salario</th>
+                <th style={{ textAlign: 'center' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {empleados.map(emp => (
-                <tr key={emp.id}>
-                  <td>{emp.nombres} {emp.apellidos}</td>
-                  <td>{emp.cargo}</td>
-                  <td><span className="badge">{emp.departamento}</span></td>
-                  <td>${emp.salario}</td>
-                  <td>
-                    <button className="btn-icon edit" onClick={() => iniciarEdicion(emp)}><Pencil size={18}/></button>
-                    <button className="btn-icon delete" onClick={() => handleEliminar(emp.id)}><Trash2 size={18}/></button>
+              {empleados.length > 0 ? (
+                empleados.map(emp => (
+                  <tr key={emp.id}>
+                    <td>
+                      <div style={{ fontWeight: '600' }}>{emp.nombres} {emp.apellidos}</div>
+                    </td>
+                    <td>{emp.cargo}</td>
+                    <td>
+                      <span style={{ background: '#e0e7ff', color: '#4338ca', padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '500' }}>
+                        {emp.departamento}
+                      </span>
+                    </td>
+                    <td style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>${emp.salario}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button className="btn-icon edit" onClick={() => iniciarEdicion(emp)} title="Editar"><Pencil size={18}/></button>
+                      <button className="btn-icon delete" onClick={() => handleEliminar(emp.id)} title="Eliminar"><Trash2 size={18}/></button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                    No hay empleados registrados.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
